@@ -1,0 +1,579 @@
+<html>
+    <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Personagens IA</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #f0f0f0, #dbe9ff);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .generator-container {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        width: 100%;
+        max-width: 800px;
+        animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 25px;
+        font-size: 2em;
+        position: relative;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        width: 50px;
+        height: 4px;
+        background: #3498db;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 2px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #555;
+    }
+
+    select, input, textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1em;
+        transition: border-color 0.3s;
+    }
+
+    select:focus, input:focus, textarea:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+    }
+
+    textarea {
+        height: 120px;
+        resize: vertical;
+    }
+
+    .button-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 25px;
+    }
+
+    button {
+        background: #4CAF50;
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1em;
+        display: flex;
+        align-items: center;
+        transition: background 0.3s, transform 0.2s;
+    }
+
+    button svg {
+        margin-right: 8px;
+        fill: white;
+        width: 20px;
+        height: 20px;
+    }
+
+    button:hover {
+        background: #45a049;
+        transform: translateY(-2px);
+    }
+
+    #viewBtn {
+        background: #3498db;
+        display: flex;
+        align-items: center;
+    }
+
+    #viewBtn:hover {
+        background: #2980b9;
+    }
+
+    #downloadBtn {
+        background: #e74c3c;
+        display: flex;
+        align-items: center;
+    }
+
+    #downloadBtn:hover {
+        background: #c0392b;
+    }
+
+    .loading {
+        display: none;
+        text-align: center;
+        margin: 30px 0;
+    }
+
+    .spinner {
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #3498db;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    #characterImage {
+        max-width: 100%;
+        height: auto;
+        margin-top: 25px;
+        border-radius: 12px;
+        display: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+
+    #characterImage:hover {
+        transform: scale(1.02);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 10;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.85);
+        animation: fadeInModal 0.5s ease;
+    }
+
+    @keyframes fadeInModal {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        margin: auto;
+        display: block;
+        max-width: 80%;
+        max-height: 80vh;
+        border-radius: 10px;
+        animation: zoomIn 0.5s ease;
+    }
+
+    @keyframes zoomIn {
+        from { transform: scale(0.8); }
+        to { transform: scale(1); }
+    }
+
+    .close {
+        position: absolute;
+        top: 20px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 35px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.3s;
+    }
+
+    .close:hover {
+        color: #bbb;
+    }
+
+    .modal-buttons {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 15px;
+    }
+
+    .recent-images {
+        margin-top: 30px;
+        width: 100%;
+    }
+
+    .recent-images h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 15px;
+        font-size: 1.5em;
+    }
+
+    .recent-images .images-row {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+    }
+
+    .recent-images .images-row img {
+        width: 100%;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+
+    .recent-images .images-row img:hover {
+        transform: scale(1.05);
+    }
+
+    @media (max-width: 800px) {
+        .generator-container {
+            padding: 20px;
+        }
+
+        button {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .modal-content {
+            max-width: 95%;
+            max-height: 70vh;
+        }
+
+        .recent-images .images-row {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 500px) {
+        .recent-images .images-row {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+</head>
+
+<body>
+    <div class="generator-container">
+        <h1>Gerador de Personagens IA</h1>
+        
+        <div class="form-group">
+            <label for="characterName">Nome do Personagem:</label>
+            <input type="text" id="characterName" placeholder="Digite o nome do personagem" required>
+        </div>
+
+        <div class="form-group">
+            <label for="gender">Gênero:</label>
+            <select id="gender">
+                <option value="male">Masculino</option>
+                <option value="female">Feminino</option>
+                <option value="non-binary">Não-Binário</option>
+                <option value="other">Outro</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="pose">Pose/Ângulo:</label>
+            <select id="pose">
+                <option value="full body, front view">em pé, corpo inteiro, vista frontal, braços, pernas, pés</option>
+                <option value="full body, side view">pose de perfil</option>
+                <option value="full body, back view"> em pé, corpo inteiro, vista traseira, braços, pernas, pés, costas</option>
+                <option value="full body, 3/4 view">vista isométrica</option>
+                <option value="upper body">Meio Corpo</option>
+                <option value="portrait">Retrato</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="direcao">Direção do rosto</label>
+            <select id="direcao">
+                <option value="olhando para frente">Olhando para frente</option>
+                <option value="olhando para trás">Olhando para trás</option>
+                <option value="olhando para o lado direito"> Olhando para o lado direito</option>
+                <option value="olhando para o lado esquerdo">Olhando para o lado esquerdo</option>
+                <option value="olhando para baixo">Olhando para baixo</option>
+                <option value="olhando para cima">Olhando para cima</option>
+            </select>
+        </div>
+        
+
+        <div class="form-group">
+            <label for="age">Idade:</label>
+            <input type="number" id="age" min="0" max="120" value="10" placeholder="Digite a idade">
+        </div>
+
+        <div class="form-group">
+            <label for="hair">Cabelo:</label>
+            <select id="hair">
+                <option value="short">Curto</option>
+                <option value="long">Longo</option>
+                <option value="curly">Cacheado</option>
+                <option value="straight">Liso</option>
+                <option value="bald">Calvo</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="hairColor">Cor do Cabelo:</label>
+            <select id="hairColor">
+                <option value="black">Preto</option>
+                <option value="brown">Castanho</option>
+                <option value="blonde">Loiro</option>
+                <option value="red">Ruivo</option>
+                <option value="grey">Grisalho</option>
+                <option value="other">Outra</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="accessories">Acessórios:</label>
+            <select id="accessories" multiple>
+                <option value="glasses">Óculos</option>
+                <option value="cap">Boné</option>
+                <option value="hat">Chapéu</option>
+                <option value="backpack">Mochila</option>
+                <option value="shoes">Sapatos</option>
+                <option value="sandals">Sandálias</option>
+                <option value="boots">Botas</option>
+                <option value="necklace">Colar</option>
+                <option value="earrings">Brincos</option>
+                <option value="watch">Relógio</option>
+                <option value="bracelet">Pulseira</option>
+                <option value="ring">Anel</option>
+                <option value="belt">Cinto</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="clothing">Estilo de Roupa:</label>
+            <select id="clothing">
+                <option value="casual">Casual</option>
+                <option value="formal">Formal</option>
+                <option value="sporty">Esportivo</option>
+                <option value="fantasy">Fantasia</option>
+                <option value="stealth">Furtivo</option>
+                <option value="vintage">Vintage</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="style">Estilo Artístico:</label>
+            <select id="style">                
+                <option value="anime">Anime</option>
+                <option value="cartoon">Cartoon</option>
+                <option value="3d">3D</option>
+                <option value="pixel art">Pixel Art</option>
+                <option value="watercolor">Aquarela</option>
+            </select>
+        </div>
+
+        <div class="button-group">
+            <button onclick="generateCharacter()">
+                <!-- SVG Icon for Generate -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+                Gerar Personagem
+            </button>
+            <button id="viewBtn" onclick="viewImage()" style="display: none;">
+                <!-- SVG Icon for View -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10zm0-8a3 3 0 100 6 3 3 0 000-6z"/>
+                </svg>
+                Visualizar Imagem
+            </button>
+        </div>
+
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Gerando seu personagem...</p>
+        </div>
+
+        <img id="characterImage" alt="Personagem Gerado">
+
+        <div class="recent-images">
+            <h2>Últimas Imagens</h2>
+            <div class="images-row">
+                <!-- Imagens recentes serão adicionadas aqui -->
+            </div>
+        </div>
+    </div>
+
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+        <div class="modal-buttons">
+            <button id="downloadBtn" onclick="downloadImage()">
+                <!-- SVG Icon for Download -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M5 20h14v-2H5v2zm7-18l-7 7h4v6h6v-6h4l-7-7z"/>
+                </svg>
+                Baixar Imagem
+            </button>
+        </div>
+    </div>
+
+    <script>
+    let currentImageUrl = '';
+    let imageCache = [];
+
+    function generateCharacter() {
+        const loading = document.querySelector('.loading');
+        const characterImage = document.getElementById('characterImage');
+        const viewBtn = document.getElementById('viewBtn');
+
+        const characterName = document.getElementById('characterName').value.trim();
+        const gender = document.getElementById('gender').value;
+        const pose = document.getElementById('pose').value;
+        const direcao = document.getElementById('direcao').value;
+        const age = document.getElementById('age').value;
+        const hair = document.getElementById('hair').value;
+        const hairColor = document.getElementById('hairColor').value;
+        const clothing = document.getElementById('clothing').value;
+        const style = document.getElementById('style').value;
+        const accessoriesSelect = document.getElementById('accessories');
+        const selectedAccessories = Array.from(accessoriesSelect.selectedOptions).map(option => option.value).join(', ');
+
+        if (!characterName) {
+            alert('Por favor, insira o nome do personagem.');
+            return;
+        }
+
+        // Geração de seed consistente baseada no nome e características
+const nameSeed = characterName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+const characteristicSeed = `${hairColor}${hair}${clothing}${selectedAccessories || ''}${pose}${direcao}`;
+const seed = nameSeed + characteristicSeed.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+// Prompt consistente com base no estilo e características
+let prompt = `${style} style ${gender} character named ${characterName}, ${age} years old, with ${hairColor} ${hair} hair, wearing ${clothing} clothes, ${pose}, facing ${direcao}.`;
+
+if (selectedAccessories) {
+    prompt += `, wearing ${selectedAccessories}`;
+}
+
+// Inclui a seed no log ou no envio, se necessário
+console.log('Seed:', seed);
+
+
+
+        const width = 512;
+        const height = 768;
+
+        loading.style.display = 'block';
+        characterImage.style.display = 'none';
+        viewBtn.style.display = 'none';
+
+        const encodedPrompt = encodeURIComponent(prompt);
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?seed=${seed}&width=${width}&height=${height}&nologo=true`;
+        currentImageUrl = imageUrl;
+
+        const img = new Image();
+        img.onload = function() {
+            loading.style.display = 'none';
+            characterImage.src = imageUrl;
+            characterImage.style.display = 'block';
+            viewBtn.style.display = 'flex';
+            addToImageCache(imageUrl);
+        };
+
+        img.onerror = function() {
+            loading.style.display = 'none';
+            alert('Erro ao gerar a imagem. Por favor, tente novamente.');
+        };
+
+        img.src = imageUrl;
+    }
+
+    function viewImage() {
+        if (!currentImageUrl) return;
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        modal.style.display = "block";
+        modalImg.src = currentImageUrl;
+    }
+
+    function viewImageWithUrl(url) {
+        if (!url) return;
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        modal.style.display = "block";
+        modalImg.src = url;
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('imageModal');
+        modal.style.display = "none";
+    }
+
+    function downloadImage() {
+        const modalImg = document.getElementById('modalImage');
+        if (!modalImg.src) return;
+        const link = document.createElement('a');
+        link.href = modalImg.src;
+        link.download = 'personagem-gerado.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function addToImageCache(url) {
+        imageCache.unshift(url);
+        if (imageCache.length > 6) {
+            imageCache.pop();
+        }
+        updateRecentImages();
+    }
+
+    function updateRecentImages() {
+        const imagesRow = document.querySelector('.recent-images .images-row');
+        imagesRow.innerHTML = '';
+        imageCache.forEach(url => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = 'Imagem Recente';
+            img.onclick = function() { viewImageWithUrl(url); };
+            imagesRow.appendChild(img);
+        });
+    }
+
+    // Close modal when clicking outside the image
+    window.onclick = function(event) {
+        const modal = document.getElementById('imageModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+    </script>
+</body>
+</html>
